@@ -1,20 +1,43 @@
+function fetchUserData() {
+    const username = document.getElementById('username').value.trim();
 
-var form = document.getElementById("myForm")
+    if (username === '') {
+      alert('Please enter a valid Github username');
+      return;
+    }
 
-form.addEventListener('submit',function(e){
-  e.preventDefault()
+    const apiUrl = `https://api.github.com/users/${username}`;
 
-  var search = document.getElementById("search").value
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('User not found');
+        }
+        return response.json();
+      })
+      .then(data => {
+        displayUserInfo(data);
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
 
-  var originalName = search.split(' ').join('')
+  function displayUserInfo(user) {
+    const resultElement = document.getElementById('result');
 
-  fetch("https://api.github.com/users/sriv0024/repos")
-  .then((result) => result.json())
-  .then((data) => {
-    console.log(data)
-  })
+    // Clear previous results
+    resultElement.innerHTML = '';
 
-  document.getElementById("result").innerHTML = `
-  <a target="_blank" href="https://www.github.com/${originalName}" <img src ="${data.avatar_url}"/></a>
-  `
-})
+    // Display user information
+    const infoParagraph = document.createElement('p');
+    infoParagraph.innerHTML = `
+      <strong>Username:</strong> ${user.login}<br>
+      <strong>Name:</strong> ${user.name || 'N/A'}<br>
+      <strong>Location:</strong> ${user.location || 'N/A'}<br>
+      <strong>Public Repositories:</strong> ${user.public_repos}<br>
+      <strong>Followers:</strong> ${user.followers}<br>
+      <strong>Profile URL:</strong> <a href="${user.html_url}" target="_blank">${user.html_url}</a><br>
+    `;
+    resultElement.appendChild(infoParagraph);
+  }
